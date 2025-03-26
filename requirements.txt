@@ -9,6 +9,7 @@ Flask-SQLAlchemy==3.1.1
 Flask-Login==0.6.3
 Flask-Bcrypt==1.0.1
 Flask-Caching==2.3.1
+Flask-Migrate==4.1.0
 Flask-WTF==1.2.2
 frozenlist==1.4.1
 requests==2.32.3
