@@ -1,0 +1,13 @@
+gunicorn==23.0.0
+h11==0.14.0
+idna==3.8
+isodate==0.6.1
+itsdangerous==2.2.0
+Jinja2==3.1.4
+Flask==3.1.0
+frozenlist==1.4.1
+requests==2.32.3
+requests-oauthlib==2.0.0
+python-dotenv==1.0.1
+Flask-Caching
+apscheduler

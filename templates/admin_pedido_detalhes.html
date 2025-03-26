@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <a href="{{ url_for('admin_pedidos') }}" class="btn btn-secondary mb-3">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+    
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Pedido #{{ pedido.id }}</h3>
+        </div>
+        
+        <div class="card-body">
+            <!-- Seção de Status -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Informações do Pedido</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <strong>Data:</strong> {{ pedido.data_pedido.strftime('%d/%m/%Y %H:%M') }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Cliente:</strong> {{ pedido.usuario.nome }} ({{ pedido.usuario.email }})
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Total:</strong> {{ pedido.total|brl }}
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-6">
+                    <h5>Atualizar Status</h5>
+                    <form method="POST" action="{{ url_for('atualizar_status_pedido', pedido_id=pedido.id) }}">
+                        <div class="mb-3">
+                            <select name="status" class="form-select">
+                                {% for status in ['pendente', 'processando', 'enviado', 'entregue', 'cancelado'] %}
+                                    <option value="{{ status }}" {% if pedido.status == status %}selected{% endif %}>
+                                        {{ status|title }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <textarea name="observacoes" class="form-control" 
+                                      placeholder="Adicionar observações...">{{ pedido.observacoes }}</textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Atualizar Status
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Itens do Pedido -->
+            <h5 class="mt-4">Produtos</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Preço Unitário</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in pedido.itens %}
+                        <tr>
+                            <td>{{ item.produto_nome }} (Cód: {{ item.produto_codigo }})</td>
+                            <td>{{ item.quantidade }}</td>
+                            <td>{{ item.preco_unitario|brl }}</td>
+                            <td>{{ (item.quantidade * item.preco_unitario)|brl }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

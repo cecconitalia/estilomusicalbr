@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="bi bi-clipboard-data"></i> Painel de Pedidos</h2>
+    
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <form class="d-flex">
+                        <select name="status" class="form-select" onchange="this.form.submit()">
+                            <option value="todos" {% if status_atual == 'todos' %}selected{% endif %}>Todos os Status</option>
+                            <option value="pendente" {% if status_atual == 'pendente' %}selected{% endif %}>Pendente</option>
+                            <option value="processando" {% if status_atual == 'processando' %}selected{% endif %}>Processando</option>
+                            <option value="enviado" {% if status_atual == 'enviado' %}selected{% endif %}>Enviado</option>
+                            <option value="entregue" {% if status_atual == 'entregue' %}selected{% endif %}>Entregue</option>
+                            <option value="cancelado" {% if status_atual == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Nº Pedido</th>
+                            <th>Data</th>
+                            <th>Cliente</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in pedidos %}
+                        <tr class="align-middle">
+                            <td>#{{ pedido.id }}</td>
+                            <td>{{ pedido.data_pedido.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>{{ pedido.usuario.nome }}</td>
+                            <td>{{ pedido.total|brl }}</td>
+                            <td>
+                                <span class="badge bg-{{ 
+                                    'secondary' if pedido.status == 'pendente' 
+                                    else 'info' if pedido.status == 'processando' 
+                                    else 'primary' if pedido.status == 'enviado' 
+                                    else 'success' if pedido.status == 'entregue' 
+                                    else 'danger' 
+                                }}">
+                                    {{ pedido.status|title }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin_pedido_detalhes', pedido_id=pedido.id) }}" 
+                                   class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye"></i> Detalhes
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <nav aria-label="Paginação">
+                <ul class="pagination justify-content-center">
+                    {% for page_num in pedidos.iter_pages() %}
+                        <li class="page-item {% if page_num == pedidos.page %}active{% endif %}">
+                            <a class="page-link" 
+                               href="{{ url_for('admin_pedidos', page=page_num, status=status_atual) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}

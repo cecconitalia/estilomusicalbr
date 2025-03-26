@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ produto.nome }} - Estilo Musical</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{{ produto.descricaoCurta|default('Detalhes do produto musical', true) }}">
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+      body {
+        background-color: #f0f0f0;
+      }
+      .navbar {
+        background-color: #000000;
+      }
+      .navbar-brand img {
+        width: 50px;
+        height: auto;
+      }
+      .navbar-brand {
+        color: #FFD700;
+      }
+      .navbar-brand:hover {
+        color: #FFDD44;
+      }
+      .navbar-nav .nav-link {
+        color: #fff;
+      }
+      .navbar-nav .nav-link:hover {
+        color: #FFD700;
+      }
+      .navbar-nav .nav-item {
+        margin-right: 15px;
+      }
+      .produto-card {
+        margin-bottom: 20px;
+        transition: transform 0.2s ease-in-out;
+        position: relative;
+      }
+      .produto-imagem {
+        width: 100%;
+        height: 300px;
+        object-fit: contain;
+        border-radius: 8px 8px 0 0;
+        cursor: pointer;
+      }
+      .btn-custom {
+        font-size: 14px;
+        padding: 8px 16px;
+        border-radius: 25px;
+        width: 100%;
+      }
+      .whatsapp-btn {
+        background-color: #25D366;
+        color: white;
+        font-size: 14px;
+        padding: 8px 16px;
+        border-radius: 25px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+      }
+      #backToTop {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 99;
+        border: none;
+        outline: none;
+        background-color: #000;
+        color: #FFD700;
+        cursor: pointer;
+        padding: 10px;
+        border-radius: 50%;
+      }
+      #backToTop:hover {
+        background-color: #333;
+      }
+    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-846593424"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'AW-846593424');
+    </script>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/" aria-label="Voltar para a página inicial">
+          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcoFcbVQ37stOMeVyz_Ym8Ytz941DEQju75g&s" alt="Logo Estilo Musical">
+          Estilo Musical
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="#">Áudio e Instrumentos Musicais</a>
+            </li>
+          </ul>
+          
+          <!-- Ícone do Carrinho -->
+          <ul class="navbar-nav ms-auto me-3">
+            <li class="nav-item">
+              <a class="nav-link position-relative" href="/carrinho" aria-label="Carrinho de compras">
+                <i class="bi bi-cart3" style="font-size: 1.2rem;"></i>
+                {% if cart_total_items > 0 %}
+                  <span class="position-absolute top-10 start-90 translate-middle badge rounded-pill bg-danger cart-counter">
+                    {{ cart_total_items }}
+                    <span class="visually-hidden">itens no carrinho</span>
+                  </span>
+                {% endif %}
+              </a>
+            </li>
+          </ul>
+
+          <!-- Área do Usuário -->
+          <div class="d-flex align-items-center">
+            {% if current_user.is_authenticated %}
+              <!-- Dropdown do Usuário -->
+              <div class="dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-person-circle"></i> {{ current_user.nome }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><a class="dropdown-item" href="/perfil"><i class="bi bi-person"></i> Meu Perfil</a></li>
+                  <li><a class="dropdown-item" href="/pedidos"><i class="bi bi-receipt"></i> Meus Pedidos</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Sair</a></li>
+                </ul>
+              </div>
+            {% else %}
+              <!-- Links de Login/Registro -->
+              <ul class="navbar-nav">
+                <li class="nav-item">
+                  <a class="nav-link" href="/login"><i class="bi bi-box-arrow-in-right"></i> Login</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="/registrar"><i class="bi bi-person-plus"></i> Registrar</a>
+                </li>
+              </ul>
+            {% endif %}
+          </div>
+
+          <!-- Formulário de Busca -->
+          <form class="d-flex ms-3" method="GET" action="/">
+            <input class="form-control me-2" type="search" placeholder="Buscar produto" aria-label="Buscar" name="search" value="{{ request.args.get('search', '') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-outline-success" type="submit">Buscar</button>
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Conteúdo Específico do Produto -->
+    <div class="container mt-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Catálogo</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ produto.nome }}</li>
+            </ol>
+        </nav>
+
+        <div class="row g-4">
+            <!-- Coluna da Imagem -->
+            <div class="col-md-6">
+                {% if produto.imagemURL %}
+                    <img src="{{ produto.imagemURL }}" class="img-fluid rounded-3 shadow" alt="{{ produto.nome }}">
+                {% else %}
+                    <div class="card h-100">
+                        <div class="card-body text-center d-flex align-items-center justify-content-center">
+                            <i class="bi bi-image text-muted fs-1"></i>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Coluna de Informações -->
+            <div class="col-md-6">
+                <div class="card h-100 shadow">
+                    <div class="card-body">
+                        <h1 class="h2 mb-4">{{ produto.nome }}</h1>
+                        
+                        <div class="d-flex align-items-center gap-2 mb-4">
+                            <span class="h3 text-success">{{ produto.preco|brl }}</span>
+                            <span class="badge bg-{{ 'success' if produto.estoque.saldoVirtualTotal > 0 else 'warning' }}">
+                                Estoque: {{ produto.estoque.saldoVirtualTotal }}
+                            </span>
+                        </div>
+
+                        <dl class="row">
+                            <dt class="col-sm-3">Código</dt>
+                            <dd class="col-sm-9">{{ produto.codigo }}</dd>
+
+                            <dt class="col-sm-3">Descrição</dt>
+                            <dd class="col-sm-9 text-muted">
+                                {{ produto.descricaoCurta|default("Sem descrição disponível", true) }}
+                            </dd>
+                        </dl>
+
+                        <!-- Formulário do Carrinho -->
+                        <form id="addToCartForm" method="POST" action="{{ url_for('adicionar_ao_carrinho') }}">
+                            <input type="hidden" name="produto_id" value="{{ produto.id }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            
+                            <div class="row g-3 align-items-center mb-3">
+                                <div class="col-auto">
+                                    <label for="quantity" class="col-form-label">Quantidade</label>
+                                </div>
+                                <div class="col-auto">
+                                    <input type="number" 
+                                           name="quantidade" 
+                                           id="quantity" 
+                                           value="1" 
+                                           min="1" 
+                                           max="{{ produto.estoque.saldoVirtualTotal }}" 
+                                           class="form-control"
+                                           style="width: 100px"
+                                           {{ 'disabled' if produto.estoque.saldoVirtualTotal <= 0 }}>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" 
+                                    class="btn btn-primary btn-lg w-100" 
+                                    {{ 'disabled' if produto.estoque.saldoVirtualTotal <= 0 }}>
+                                <i class="bi bi-cart-plus"></i>
+                                {{ 'Adicionar ao Carrinho' if produto.estoque.saldoVirtualTotal > 0 else 'Indisponível' }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão Voltar ao Topo -->
+    <button id="backToTop" aria-label="Voltar ao topo">
+      <i class="bi bi-arrow-up"></i>
+    </button>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="d-none" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+    </div>
+
+    <!-- Toast de Confirmação -->
+    <div id="toastSuccess" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+      <div class="d-flex">
+        <div class="toast-body">
+          Produto adicionado ao carrinho!
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+      </div>
+    </div>
+
+    <!-- Toast de Erro -->
+    <div id="toastError" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+      <div class="d-flex">
+        <div class="toast-body">
+          Erro ao adicionar produto ao carrinho!
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Script do botão Voltar ao Topo
+      const backToTopButton = document.getElementById('backToTop');
+      window.addEventListener('scroll', () => {
+        backToTopButton.style.display = window.scrollY > 300 ? 'block' : 'none';
+      });
+      backToTopButton.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      // Script para adicionar ao carrinho
+      document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('addToCartForm');
+        const toastSuccess = new bootstrap.Toast(document.getElementById('toastSuccess'));
+        const toastError = new bootstrap.Toast(document.getElementById('toastError'));
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        if (form) {
+          form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Mostrar loading spinner
+            loadingSpinner.classList.remove('d-none');
+            
+            // Enviar formulário via AJAX
+            fetch(form.action, {
+              method: 'POST',
+              body: new FormData(form),
+              headers: {
+                'X-CSRFToken': form.querySelector('input[name="csrf_token"]').value
+              }
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Erro na requisição');
+              }
+              return response.json();
+            })
+            .then(data => {
+              // Esconder loading spinner
+              loadingSpinner.classList.add('d-none');
+              
+              // Mostrar toast de sucesso
+              toastSuccess.show();
+              
+              // Atualizar contador do carrinho
+              if (data.cart_total_items) {
+                const cartBadge = document.querySelector('.cart-counter');
+                if (cartBadge) {
+                  cartBadge.textContent = data.cart_total_items;
+                }
+              }
+            })
+            .catch(error => {
+              console.error('Erro:', error);
+              loadingSpinner.classList.add('d-none');
+              toastError.show();
+            });
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

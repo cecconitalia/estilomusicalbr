@@ -1,0 +1,7 @@
+{
+    "error": {
+        "type": "RESOURCE_NOT_FOUND",
+        "message": "N\u00e3o encontrado.",
+        "description": "O recurso requisitado n\u00e3o foi encontrado. Verifique se o endpoint solicitado est\u00e1 correto ou se o ID informado realmente existe no sistema."
+    }
+}
