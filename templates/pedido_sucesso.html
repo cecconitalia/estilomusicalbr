@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-check-circle"></i> Pedido #{{ pedido.id }} realizado com sucesso!
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <h5 class="alert-heading">Obrigado por sua compra, {{ pedido.cliente_nome }}!</h5>
+                        <p class="mb-0">Seu pedido foi registrado e entraremos em contato em breve.</p>
+                    </div>
+
+                    <!-- Resumo do Pedido -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="bi bi-receipt"></i> Resumo do Pedido</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Número do Pedido:</strong> #{{ pedido.id }}</p>
+                                    <p><strong>Data:</strong> {{ pedido.data_pedido.strftime('%d/%m/%Y %H:%M') }}</p>
+                                    <p><strong>Total:</strong> {{ pedido.total|brl }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Forma de Pagamento:</strong> {{ pedido.metodo_pagamento }}</p>
+                                    <p><strong>Status do Pagamento:</strong> 
+                                        <span class="badge bg-{{ 'success' if pedido.status_pagamento == 'aprovado' else 'warning' if pedido.status_pagamento == 'pendente' else 'danger' }}">
+                                            {{ pedido.status_pagamento|title }}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instruções de Pagamento -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="bi bi-credit-card"></i> Instruções de Pagamento</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if pedido.metodo_pagamento == 'Pix' %}
+                            <div class="pix-container">
+                                {% if pix_data %}
+                                    <div class="pix-valid">
+                                        <div class="row">
+                                            <div class="col-md-6 text-center">
+                                                <div class="qr-code-container">
+                                                    <img src="{{ pix_data.qr_code }}" 
+                                                         alt="QR Code Pix" 
+                                                         class="qr-code-img"
+                                                         onclick="zoomQR(this)">
+                                                    <div class="qr-code-actions mt-3">
+                                                        <button class="btn btn-success" 
+                                                                onclick="copyPixPayload()">
+                                                            <i class="bi bi-clipboard-check"></i> Copiar Código
+                                                        </button>
+                                                        <a href="{{ pix_data.qr_code }}" 
+                                                           download="PIX-{{ pedido.id }}.png" 
+                                                           class="btn btn-secondary">
+                                                            <i class="bi bi-download"></i> Baixar
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-6">
+                                                <div class="pix-info-card">
+                                                    <h4 class="mb-4"><i class="bi bi-wallet2"></i> Informações para Pagamento</h4>
+                                                    
+                                                    <div class="info-item">
+                                                        <span class="label">Chave Pix:</span>
+                                                        <span class="value">{{ pix_data.key }}</span>
+                                                        <button class="btn btn-sm btn-outline-secondary copy-btn"
+                                                                onclick="copyText('{{ pix_data.key }}')">
+                                                            <i class="bi bi-clipboard"></i>
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <div class="info-item">
+                                                        <span class="label">Valor:</span>
+                                                        <span class="value">{{ pix_data.amount|brl }}</span>
+                                                    </div>
+                                                    
+                                                    <div class="info-item">
+                                                        <span class="label">Beneficiário:</span>
+                                                        <span class="value">{{ pix_data.merchant }}</span>
+                                                    </div>
+                                                    
+                                                    <div class="info-item">
+                                                        <span class="label">Cidade:</span>
+                                                        <span class="value">{{ pix_data.city }}</span>
+                                                    </div>
+                                                    
+                                                    <div class="alert alert-warning mt-4">
+                                                        <i class="bi bi-exclamation-circle"></i>
+                                                        O QR Code expira em 24 horas. Após o pagamento, o status será atualizado automaticamente.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="pix-error alert alert-danger">
+                                        <h4><i class="bi bi-x-circle-fill"></i> Erro no QR Code Pix</h4>
+                                        <p>Não foi possível gerar o QR Code válido. Por favor:</p>
+                                        <ul>
+                                            <li>Verifique se a chave Pix está correta</li>
+                                            <li>Confira o valor do pedido</li>
+                                            <li>Tente novamente em alguns minutos</li>
+                                        </ul>
+                                        <div class="mt-3">
+                                            <a href="/contato" class="btn btn-outline-danger">
+                                                <i class="bi bi-telephone"></i> Falar com Suporte
+                                            </a>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <style>
+                            .pix-container {
+                                border: 2px solid #0d3b66;
+                                border-radius: 15px;
+                                padding: 2rem;
+                                margin: 2rem 0;
+                                background: #f8f9fa;
+                            }
+                            
+                            .qr-code-img {
+                                max-width: 280px;
+                                border: 1px solid #dee2e6;
+                                border-radius: 10px;
+                                padding: 10px;
+                                background: white;
+                                cursor: zoom-in;
+                            }
+                            
+                            .pix-info-card {
+                                background: white;
+                                padding: 1.5rem;
+                                border-radius: 10px;
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                            }
+                            
+                            .info-item {
+                                display: flex;
+                                align-items: center;
+                                margin-bottom: 1rem;
+                                padding: 0.8rem;
+                                background: #f8f9fa;
+                                border-radius: 8px;
+                            }
+                            
+                            .label {
+                                flex: 1;
+                                font-weight: 500;
+                                color: #0d3b66;
+                            }
+                            
+                            .value {
+                                flex: 2;
+                                color: #495057;
+                            }
+                            
+                            .copy-btn {
+                                margin-left: 1rem;
+                                width: 40px;
+                            }
+                            
+                            .zoom-overlay {
+                                position: fixed;
+                                top: 0;
+                                left: 0;
+                                width: 100%;
+                                height: 100%;
+                                background: rgba(0,0,0,0.8);
+                                display: none;
+                                justify-content: center;
+                                align-items: center;
+                                z-index: 1000;
+                            }
+                            
+                            .zoom-qr {
+                                max-width: 90%;
+                                max-height: 90%;
+                                border: 3px solid white;
+                                border-radius: 15px;
+                            }
+                            </style>
+                            
+                            <script>
+                            function copyPixPayload() {
+                                copyText("{{ pix_data.payload }}", "Código Pix copiado! Cole no seu app bancário.");
+                            }
+                            
+                            function copyText(text, message = "Texto copiado!") {
+                                navigator.clipboard.writeText(text)
+                                    .then(() => showToast(message))
+                                    .catch(err => console.error('Erro ao copiar:', err));
+                            }
+                            
+                            function showToast(message) {
+                                const toast = document.createElement('div');
+                                toast.className = 'pix-toast';
+                                toast.innerHTML = `
+                                    <div class="toast-body">
+                                        <i class="bi bi-check-circle"></i> ${message}
+                                    </div>
+                                `;
+                                
+                                document.body.appendChild(toast);
+                                setTimeout(() => toast.remove(), 3000);
+                            }
+                            
+                            function zoomQR(img) {
+                                const overlay = document.createElement('div');
+                                overlay.className = 'zoom-overlay';
+                                overlay.innerHTML = `<img src="${img.src}" class="zoom-qr">`;
+                                
+                                overlay.onclick = () => overlay.remove();
+                                document.body.appendChild(overlay);
+                            }
+                            </script>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Produtos do Pedido -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="bi bi-cart-check"></i> Produtos</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Produto</th>
+                                            <th>Quantidade</th>
+                                            <th>Preço Unitário</th>
+                                            <th>Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in pedido.itens %}
+                                        <tr>
+                                            <td>{{ item.produto_nome }} (Cód: {{ item.produto_codigo }})</td>
+                                            <td>{{ item.quantidade }}</td>
+                                            <td>{{ item.preco_unitario|brl }}</td>
+                                            <td>{{ (item.quantidade * item.preco_unitario)|brl }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informações de Contato -->
+                    <div class="alert alert-light">
+                        <h5><i class="bi bi-headset"></i> Precisa de ajuda?</h5>
+                        <p class="mb-1">Entre em contato conosco através dos seguintes canais:</p>
+                        <ul class="mb-1">
+                            <li><strong>WhatsApp:</strong> (XX) XXXX-XXXX</li>
+                            <li><strong>Email:</strong> contato@estilomusical.com.br</li>
+                            <li><strong>Telefone:</strong> (XX) XXXX-XXXX</li>
+                        </ul>
+                        <p class="mb-0">Horário de atendimento: Segunda a Sexta, das 9h às 18h</p>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary">
+                            <i class="bi bi-house-door"></i> Voltar à Página Inicial
+                        </a>
+                        <a href="{{ url_for('perfil') }}" class="btn btn-outline-primary ms-2">
+                            <i class="bi bi-person"></i> Ver Meus Pedidos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .card-header {
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+    }
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.35em 0.65em;
+    }
+    .bg-success {
+        background-color: #28a745 !important;
+    }
+    .bg-primary {
+        background-color: #007bff !important;
+    }
+    .bg-warning {
+        background-color: #ffc107 !important;
+        color: #212529;
+    }
+    .table th {
+        font-weight: 600;
+    }
+</style>
+{% endblock %}

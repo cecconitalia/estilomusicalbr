@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="bi bi-cash-stack"></i> Gerenciamento de Comissões</h2>
+    
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <!-- Filtros e Estatísticas -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="btn-group">
+                        <a href="{{ url_for('admin_comissoes', status='todos') }}" 
+                           class="btn btn-outline-secondary {% if status == 'todos' %}active{% endif %}">
+                            Todas
+                        </a>
+                        <a href="{{ url_for('admin_comissoes', status='pendente') }}" 
+                           class="btn btn-outline-warning {% if status == 'pendente' %}active{% endif %}">
+                            Pendentes ({{ total_pendente }})
+                        </a>
+                        <a href="{{ url_for('admin_comissoes', status='pago') }}" 
+                           class="btn btn-outline-success {% if status == 'pago' %}active{% endif %}">
+                            Pagas ({{ total_pago }})
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <form class="d-flex">
+                        <input type="text" name="search" class="form-control" placeholder="Buscar por nome, email ou ID..." 
+                               value="{{ search }}">
+                        <button type="submit" class="btn btn-primary ms-2">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tabela de Comissões -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Indicador</th>
+                            <th>Pedido</th>
+                            <th>Valor</th>
+                            <th>Percentual</th>
+                            <th>Data</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for comissao in comissoes.items %}
+                        <tr>
+                            <td>{{ comissao.id }}</td>
+                            <td>
+                                <a href="{{ url_for('admin_usuario_detalhes', user_id=comissao.indicador_id) }}">
+                                    {{ comissao.indicador.nome }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin_pedido_detalhes', pedido_id=comissao.pedido_id) }}">
+                                    #{{ comissao.pedido_id }}
+                                </a>
+                            </td>
+                            <td>{{ comissao.valor|brl }}</td>
+                            <td>{{ comissao.percentual }}%</td>
+                            <td>{{ comissao.data_criacao.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                <span class="badge bg-{% if comissao.status == 'pago' %}success{% else %}warning{% endif %}">
+                                    {{ comissao.status|title }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if comissao.status == 'pendente' %}
+                                <form method="POST" action="{{ url_for('admin_marcar_comissao_paga', comissao_id=comissao.id) }}" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-success" title="Marcar como paga">
+                                        <i class="bi bi-check-circle"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">Nenhuma comissão encontrada</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginação -->
+            <nav aria-label="Paginação">
+                <ul class="pagination justify-content-center">
+                    {% if comissoes.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin_comissoes', page=comissoes.prev_num, status=status, search=search) }}">Anterior</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in comissoes.iter_pages() %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == comissoes.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('admin_comissoes', page=page_num, status=status, search=search) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if comissoes.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin_comissoes', page=comissoes.next_num, status=status, search=search) }}">Próxima</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}

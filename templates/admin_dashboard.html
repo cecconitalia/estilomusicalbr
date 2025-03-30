@@ -1,0 +1,443 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="bi bi-speedometer2 me-2"></i> Painel Administrativo
+        </h1>
+        <div class="text-muted small">
+            Último acesso: {% if current_user.ultimo_login %}
+                {{ current_user.ultimo_login.strftime('%d/%m/%Y %H:%M') }}
+            {% else %}
+                Primeiro acesso
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Cards de Estatísticas -->
+    <div class="row mb-4 g-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start border-primary border-4 shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Usuários</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_usuarios }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people-fill fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('admin_usuarios') }}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start border-success border-4 shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Pedidos</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_pedidos }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-cart-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('admin_pedidos') }}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start border-warning border-4 shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pendentes</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pedidos_pendentes }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-hourglass-split fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('admin_pedidos') }}?status=pendente" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start border-info border-4 shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Pedidos Hoje</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pedidos_hoje }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-calendar-day fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('admin_pedidos') }}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- New cards for referral stats -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start border-info border-4 shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Total Indicações</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_indicacoes }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-person-plus fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start border-success border-4 shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Comissões Pagas</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ comissoes_pagas|brl }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-cash-stack fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start border-warning border-4 shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Comissões Pendentes</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ comissoes_pendentes }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-hourglass-split fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('admin_comissoes') }}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start border-primary border-4 shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Usuários Prime</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ usuarios_prime }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-star-fill fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('admin_usuarios') }}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Últimos Pedidos e Usuários -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="bi bi-cart me-1"></i> Últimos Pedidos
+                    </h6>
+                    <a href="{{ url_for('admin_pedidos') }}" class="btn btn-sm btn-primary">
+                        Ver todos <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nº</th>
+                                    <th>Cliente</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pedido in ultimos_pedidos %}
+                                <tr onclick="window.location='{{ url_for('admin_pedido_detalhes', pedido_id=pedido.id) }}'" style="cursor: pointer;">
+                                    <td>#{{ pedido.id }}</td>
+                                    <td>{{ pedido.cliente_nome }}</td>
+                                    <td>{{ pedido.total|brl }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 
+                                            'secondary' if pedido.status == 'pendente' 
+                                            else 'info' if pedido.status == 'processando' 
+                                            else 'primary' if pedido.status == 'enviado' 
+                                            else 'success' if pedido.status == 'entregue' 
+                                            else 'danger' 
+                                        }}">
+                                            {{ pedido.status|title }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4">Nenhum pedido recente</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="bi bi-people me-1"></i> Últimos Usuários
+                    </h6>
+                    <a href="{{ url_for('admin_usuarios') }}" class="btn btn-sm btn-primary">
+                        Ver todos <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Email</th>
+                                    <th>Registro</th>
+                                    <th>Tipo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for usuario in ultimos_usuarios %}
+                                <tr onclick="window.location='{{ url_for('admin_usuario_detalhes', user_id=usuario.id) }}'" style="cursor: pointer;">
+                                    <td>{{ usuario.nome }}</td>
+                                    <td>{{ usuario.email }}</td>
+                                    <td>{{ usuario.data_registro.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% if usuario.is_admin %}
+                                        <span class="badge bg-primary">Admin</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Usuário</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4">Nenhum usuário recente</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de Indicações e Comissões -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="bi bi-arrow-up-right-circle me-1"></i> Top Indicadores
+                    </h6>
+                    <a href="{{ url_for('admin_usuarios') }}" class="btn btn-sm btn-primary">
+                        Ver todos <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Indicador</th>
+                                    <th>Indicações</th>
+                                    <th>Comissão Total</th>
+                                    <th>Saldo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for indicador in top_indicadores %}
+                                <tr onclick="window.location='{{ url_for('admin_usuario_detalhes', user_id=indicador.id) }}'" style="cursor: pointer;">
+                                    <td>{{ indicador.nome }}</td>
+                                    <td>{{ indicador.indicados|length }}</td>
+                                    <td>
+                                        {% set total_comissoes = indicador.comissoes_recebidas|sum(attribute='valor') %}
+                                        {{ total_comissoes|brl }}
+                                    </td>
+                                    <td>{{ indicador.saldo_comissoes|brl }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4">Nenhum dado de indicação disponível</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="bi bi-cash-coin me-1"></i> Últimas Comissões
+                    </h6>
+                    <a href="{{ url_for('admin_comissoes') }}" class="btn btn-sm btn-primary">
+                        Ver todas <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Indicador</th>
+                                    <th>Pedido</th>
+                                    <th>Valor</th>
+                                    <th>Data</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for comissao in ultimas_comissoes %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('admin_usuario_detalhes', user_id=comissao.indicador_id) }}">
+                                            {{ comissao.indicador.nome }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('admin_pedido_detalhes', pedido_id=comissao.pedido_id) }}">
+                                            #{{ comissao.pedido_id }}
+                                        </a>
+                                    </td>
+                                    <td>{{ comissao.valor|brl }}</td>
+                                    <td>{{ comissao.data_criacao.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if comissao.status == 'pago' %}success{% else %}warning{% endif %}">
+                                            {{ comissao.status|title }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">Nenhuma comissão recente</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="bi bi-lightning me-1"></i> Ações Rápidas
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-3">
+                <a href="{{ url_for('admin_novo_usuario') }}" class="btn btn-success">
+                    <i class="bi bi-person-plus me-1"></i> Novo Usuário
+                </a>
+                <a href="{{ url_for('admin_pedidos') }}" class="btn btn-primary">
+                    <i class="bi bi-clipboard-data me-1"></i> Gerenciar Pedidos
+                </a>
+                <a href="{{ url_for('admin_usuarios') }}" class="btn btn-primary">
+                    <i class="bi bi-people-fill me-1"></i> Gerenciar Usuários
+                </a>
+                <a href="{{ url_for('admin_pedidos') }}?status=pendente" class="btn btn-warning">
+                    <i class="bi bi-hourglass-split me-1"></i> Pedidos Pendentes
+                </a>
+                <a href="{{ url_for('admin_novo_prime_code') }}" class="btn btn-info">
+                    <i class="bi bi-stars me-1"></i> Novo Código Prime
+                </a>
+                <a href="{{ url_for('admin_comissoes') }}" class="btn btn-secondary">
+                    <i class="bi bi-cash-stack me-1"></i> Comissões
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 0.5rem;
+    }
+    
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.35em 0.65em;
+    }
+    
+    .border-start {
+        border-left-width: 0.25rem !important;
+    }
+    
+    .text-xs {
+        font-size: 0.7rem;
+    }
+    
+    .bg-primary { background-color: #0d6efd !important; }
+    .bg-secondary { background-color: #6c757d !important; }
+    .bg-success { background-color: #198754 !important; }
+    .bg-info { background-color: #0dcaf0 !important; }
+    .bg-warning { background-color: #ffc107 !important; }
+    .bg-danger { background-color: #dc3545 !important; }
+</style>
+{% endblock %}

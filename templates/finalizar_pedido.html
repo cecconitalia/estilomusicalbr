@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-check-circle"></i> Pedido #{{ pedido.id }} - Complete seu Pagamento
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Seletor de Método de Pagamento -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="bi bi-credit-card"></i> Escolha como pagar</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="nav nav-pills mb-3" id="payment-methods-tab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="credit-card-tab" data-bs-toggle="pill" data-bs-target="#credit-card" type="button" role="tab">
+                                        <i class="bi bi-credit-card"></i> Cartão de Crédito
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="pix-tab" data-bs-toggle="pill" data-bs-target="#pix" type="button" role="tab">
+                                        <i class="bi bi-qr-code"></i> Pix
+                                    </button>
+                                </li>
+                            </ul>
+                            
+                            <div class="tab-content" id="payment-methods-tabContent">
+                                <!-- Formulário de Cartão de Crédito -->
+                                <div class="tab-pane fade show active" id="credit-card" role="tabpanel">
+                                    <div id="card-form" class="mb-3"></div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <img src="https://http2.mlstatic.com/storage/logos-api-admin/0c5d7af0-5710-11ec-aad4-294e8d01d31d.svg" alt="Mercado Pago" height="30">
+                                        <button id="submit-card" class="btn btn-primary">
+                                            <i class="bi bi-lock"></i> Pagar {{ pedido.total|brl }}
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Opção Pix -->
+                                <div class="tab-pane fade" id="pix" role="tabpanel">
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle"></i> Você será redirecionado para gerar o QR Code Pix após confirmar.
+                                    </div>
+                                    <button id="submit-pix" class="btn btn-primary w-100">
+                                        <i class="bi bi-qr-code"></i> Gerar QR Code Pix
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumo do Pedido -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="bi bi-receipt"></i> Resumo do Pedido #{{ pedido.id }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Produto</th>
+                                            <th>Quantidade</th>
+                                            <th>Preço Unitário</th>
+                                            <th>Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in pedido.itens %}
+                                        <tr>
+                                            <td>{{ item.produto_nome }}</td>
+                                            <td>{{ item.quantidade }}</td>
+                                            <td>{{ item.preco_unitario|brl }}</td>
+                                            <td>{{ (item.quantidade * item.preco_unitario)|brl }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot class="table-active">
+                                        <tr>
+                                            <th colspan="3">Total</th>
+                                            <th>{{ pedido.total|brl }}</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mercado Pago SDK -->
+<script src="https://sdk.mercadopago.com/js/v2"></script>
+<script>
+    // Inicializa o Mercado Pago
+    const mp = new MercadoPago('SUA_PUBLIC_KEY', {
+        locale: 'pt-BR'
+    });
+
+    // Cria o formulário de cartão
+    const cardForm = mp.cardForm({
+        amount: "{{ pedido.total }}",
+        autoMount: true,
+        form: {
+            id: "card-form",
+            cardholderName: {
+                placeholder: "Titular do cartão"
+            },
+            cardNumber: {
+                placeholder: "Número do cartão"
+            },
+            cardExpirationMonth: {
+                placeholder: "Mês"
+            },
+            cardExpirationYear: {
+                placeholder: "Ano"
+            },
+            securityCode: {
+                placeholder: "CVV"
+            },
+            installments: {
+                placeholder: "Parcelas"
+            },
+            identificationType: {
+                placeholder: "Tipo de documento"
+            },
+            identificationNumber: {
+                placeholder: "Número do documento"
+            }
+        },
+        callbacks: {
+            onFormMounted: error => {
+                if (error) {
+                    console.error("Erro ao carregar formulário:", error);
+                    showAlert("Erro ao carregar dados do cartão", "danger");
+                }
+            },
+            onIdentificationTypesReceived: (error, types) => {
+                if (error) {
+                    console.error("Erro ao obter tipos de documento:", error);
+                }
+            },
+            onPaymentMethodsReceived: (error, methods) => {
+                if (error) {
+                    console.error("Erro ao obter métodos de pagamento:", error);
+                }
+            },
+            onInstallmentsReceived: (error, installments) => {
+                if (error) {
+                    console.error("Erro ao obter parcelas:", error);
+                }
+            },
+            onCardTokenReceived: (error, token) => {
+                if (error) {
+                    console.error("Erro ao gerar token:", error);
+                    showAlert("Erro ao processar cartão: " + error.message, "danger");
+                    document.getElementById("submit-card").disabled = false;
+                } else {
+                    processPayment(token.id, 'credit_card');
+                }
+            }
+        }
+    });
+
+    // Processa o pagamento
+    function processPayment(token, method) {
+        const submitBtn = method === 'credit_card' 
+            ? document.getElementById("submit-card") 
+            : document.getElementById("submit-pix");
+        
+        submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spin"></i> Processando...';
+        submitBtn.disabled = true;
+
+        fetch('/processar-pagamento', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                pedido_id: "{{ pedido.id }}",
+                token: token,
+                method: method,
+                amount: "{{ pedido.total }}"
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'approved' || data.status === 'pending') {
+                window.location.href = '/pedido-sucesso/' + "{{ pedido.id }}";
+            } else {
+                showAlert("Pagamento não aprovado: " + (data.message || "Tente novamente"), "danger");
+                submitBtn.innerHTML = method === 'credit_card' 
+                    ? '<i class="bi bi-lock"></i> Pagar {{ pedido.total|brl }}' 
+                    : '<i class="bi bi-qr-code"></i> Gerar QR Code Pix';
+                submitBtn.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error("Erro:", error);
+            showAlert("Erro ao processar pagamento", "danger");
+            submitBtn.disabled = false;
+        });
+    }
+
+    // Botão de cartão
+    document.getElementById("submit-card").addEventListener("click", (e) => {
+        e.preventDefault();
+        document.getElementById("submit-card").disabled = true;
+        cardForm.createCardToken();
+    });
+
+    // Botão de Pix
+    document.getElementById("submit-pix").addEventListener("click", (e) => {
+        e.preventDefault();
+        processPayment(null, 'pix');
+    });
+
+    // Mostra alerta
+    function showAlert(message, type) {
+        const alertDiv = document.createElement("div");
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.querySelector(".card-body").prepend(alertDiv);
+    }
+
+    // Spinner animation
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+
+<style>
+    .nav-pills .nav-link.active {
+        background-color: #007bff;
+    }
+    
+    #card-form .form-control {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid #ced4da;
+    }
+    
+    #card-form .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+    }
+    
+    #submit-card, #submit-pix {
+        padding: 10px 20px;
+        font-weight: 500;
+    }
+    
+    .card {
+        border-radius: 10px;
+    }
+    
+    .card-header {
+        font-weight: 600;
+    }
+</style>
+{% endblock %}

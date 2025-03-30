@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="bi bi-people-fill"></i> Gerenciamento de Usuários</h2>
+    
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <form class="d-flex">
+                        <input type="text" name="search" class="form-control" placeholder="Buscar usuários..." 
+                               value="{{ search }}">
+                        <button type="submit" class="btn btn-primary ms-2">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="col-md-6 text-end">
+                    <a href="{{ url_for('admin_novo_usuario') }}" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i> Novo Usuário
+                    </a>
+                </div>
+            </div>
+            
+            <div class="btn-group mb-3">
+                <a href="{{ url_for('admin_usuarios', status='todos') }}" 
+                   class="btn btn-outline-secondary {% if status == 'todos' %}active{% endif %}">
+                    Todos
+                </a>
+                <a href="{{ url_for('admin_usuarios', status='ativos') }}" 
+                   class="btn btn-outline-success {% if status == 'ativos' %}active{% endif %}">
+                    Ativos
+                </a>
+                <a href="{{ url_for('admin_usuarios', status='inativos') }}" 
+                   class="btn btn-outline-danger {% if status == 'inativos' %}active{% endif %}">
+                    Inativos
+                </a>
+                <a href="{{ url_for('admin_usuarios', status='admins') }}" 
+                   class="btn btn-outline-primary {% if status == 'admins' %}active{% endif %}">
+                    Administradores
+                </a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Registro</th>
+                            <th>Status</th>
+                            <th>Tipo</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios.items %}
+                        <tr>
+                            <td>{{ usuario.id }}</td>
+                            <td>{{ usuario.nome }}</td>
+                            <td>{{ usuario.email }}</td>
+                            <td>{{ usuario.data_registro.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                <span class="badge bg-{% if usuario.ativo %}success{% else %}danger{% endif %}">
+                                    {% if usuario.ativo %}Ativo{% else %}Inativo{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                {% if usuario.is_admin %}
+                                <span class="badge bg-primary">Admin</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Usuário</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin_usuario_detalhes', user_id=usuario.id) }}" 
+                                   class="btn btn-sm btn-primary">
+                                    <i class="bi bi-pencil-square"></i> Editar
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4">Nenhum usuário encontrado</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <nav aria-label="Paginação">
+                <ul class="pagination justify-content-center">
+                    {% if usuarios.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin_usuarios', page=usuarios.prev_num, search=search, status=status) }}">Anterior</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in usuarios.iter_pages() %}
+                        {% if page_num %}
+                            <li class="page-item {% if page_num == usuarios.page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('admin_usuarios', page=page_num, search=search, status=status) }}">{{ page_num }}</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if usuarios.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin_usuarios', page=usuarios.next_num, search=search, status=status) }}">Próxima</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Minhas Indicações - Estilo Musical{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0"><i class="bi bi-people me-2"></i>Minhas Indicações</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Data de Cadastro</th>
+                            <th>Comissão Gerada</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for indicacao in indicacoes %}
+                        <tr>
+                            <td>{{ indicacao.nome }}</td>
+                            <td>{{ indicacao.email }}</td>
+                            <td>{{ indicacao.data_registro.strftime('%d/%m/%Y') }}</td>
+                            <td>
+                                {% set total = comissoes|selectattr('pedido.usuario_id', 'equalto', indicacao.id)|sum(attribute='valor') %}
+                                R$ {{ "%.2f"|format(total) }}
+                            </td>
+                            <td>
+                                {% set comissao_pendente = comissoes|selectattr('pedido.usuario_id', 'equalto', indicacao.id)|selectattr('status', 'equalto', 'pendente')|list %}
+                                {% set comissao_paga = comissoes|selectattr('pedido.usuario_id', 'equalto', indicacao.id)|selectattr('status', 'equalto', 'pago')|list %}
+                                <span class="badge bg-{{ 'success' if comissao_paga else 'warning' }}">
+                                    {{ comissao_paga|length }} paga(s) / {{ comissao_pendente|length }} pendente(s)
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center">Nenhuma indicação encontrada</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-4 pt-3 border-top">
+                <h5><i class="bi bi-cash-stack me-2"></i>Resumo Financeiro</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">A Receber</h6>
+                                <p class="card-text h4 text-warning">
+                                    R$ {{ "%.2f"|format(comissoes|selectattr('status', 'equalto', 'pendente')|sum(attribute='valor')) }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">Recebidas</h6>
+                                <p class="card-text h4 text-success">
+                                    R$ {{ "%.2f"|format(comissoes|selectattr('status', 'equalto', 'pago')|sum(attribute='valor')) }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
