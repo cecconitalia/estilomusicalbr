@@ -1297,11 +1297,11 @@ def index():
 
     palavras = [
         "viol", "cord", "p10", "xlr", "pandeiro",
-        "teclado", "pedestal", "bat", "cap", "tarr",
+        "teclado", "pedestal", "bat", "trast", "tarr",
         "guit", "baix", "p2", "afin", "som", "baq",
-        "mic", "pilha", "radio", "porta", "pen", "amp",
-        "instr", "amp", "uku", "cav", "corre", "ded",
-        "fone", "pele", "mesa", "palhe", "mini", "amp"
+        "mic", "pilha", "radio", "porta", "pen",
+        "instr", "uku", "cav", "corre", "ded",
+        "fone", "pele", "mesa", "palhe", "mini", "usb"
     ]
 
     produtos = get_cached_products()
