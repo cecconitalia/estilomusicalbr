@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrinho de Compras - Estilo Musical</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --primary: #007bff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+        
+        .cart-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            transition: all 0.2s ease;
+        }
+        
+        .cart-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .quantity-control {
+            max-width: 140px;
+        }
+        
+        .quantity-control .btn {
+            padding: 0.25rem 0.5rem;
+            min-width: 32px;
+        }
+        
+        .quantity-control input {
+            padding: 0.25rem;
+            font-size: 0.9em;
+            width: 40px;
+            text-align: center;
+        }
+        
+        .empty-cart-icon {
+            font-size: 5rem;
+            color: #6c757d;
+            opacity: 0.6;
+        }
+        
+        .btn-checkout {
+            font-size: 1.1rem;
+            padding: 12px;
+            transition: all 0.2s;
+        }
+        
+        .payment-methods {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #dee2e6;
+        }
+        
+        .payment-details {
+            transition: all 0.3s ease;
+        }
+        
+        .discount-badge {
+            background-color: var(--success);
+            color: white;
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+        
+        .original-price {
+            text-decoration: line-through;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .cart-item img {
+            transition: transform 0.3s ease;
+            border: 1px solid #dee2e6;
+            padding: 2px;
+            background: white;
+            height: 70px;
+            width: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .cart-item:hover img {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .cart-item {
+                padding: 8px 0;
+            }
+            
+            .cart-item img {
+                height: 60px !important;
+                max-width: 80px !important;
+            }
+            
+            .quantity-control .btn {
+                padding: 0.15rem 0.35rem;
+                min-width: 28px;
+            }
+            
+            .mobile-price {
+                font-size: 0.9rem;
+                margin-top: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-3">
+        <div class="row mb-3">
+            <div class="col-12">
+                <h1 class="h4 mb-1">
+                    <i class="bi bi-cart3"></i> Seu Carrinho
+                    <span class="badge bg-primary rounded-pill">{{ cart_total_items }}</span>
+                </h1>
+                <a href="{{ url_for('index') }}" class="text-decoration-none small">
+                    <i class="bi bi-arrow-left"></i> Continuar comprando
+                </a>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="row mb-3">
+                    <div class="col-12">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% if carrinho %}
+            <div class="row g-3">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-body p-3">
+                            {% for item_id, item in carrinho.items() %}
+                                <div class="cart-item">
+                                    <div class="row align-items-center g-2">
+                                        <div class="col-3 col-md-2">
+                                            <img src="{{ url_for('proxy_image', url=item.imagem) }}" 
+                                                 alt="{{ item.nome }}"
+                                                 class="img-fluid rounded-2"
+                                                 onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/sem-imagem.jpg') }}';">
+                                        </div>
+
+                                        <div class="col-5 col-md-4">
+                                            <div class="d-flex flex-column">
+                                                <h6 class="mb-0 text-truncate">{{ item.nome }}</h6>
+                                                <small class="text-muted">Cód: {{ item.codigo }}</small>
+                                                <div class="d-md-none mt-1 mobile-price">
+                                                    {{ item.preco|brl }} <small class="text-muted">×</small> {{ item.quantidade }}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-4 col-md-3">
+                                            <div class="input-group input-group-sm quantity-control">
+                                                <button class="btn btn-outline-secondary decrement-btn py-1" 
+                                                        data-item-id="{{ item_id }}"
+                                                        {% if item.quantidade <= 1 %}disabled{% endif %}>
+                                                    <i class="bi bi-dash"></i>
+                                                </button>
+                                                <input type="text" class="form-control text-center quantity-input"
+                                                       value="{{ item.quantidade }}" readonly
+                                                       data-item-id="{{ item_id }}">
+                                                <button class="btn btn-outline-secondary increment-btn py-1"
+                                                        data-item-id="{{ item_id }}">
+                                                    <i class="bi bi-plus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 d-none d-md-block">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="text-nowrap">{{ item.preco|brl }}</div>
+                                                <div class="text-muted mx-2">×</div>
+                                                <div>{{ item.quantidade }}</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-4 col-md-2">
+                                            <div class="d-flex align-items-center justify-content-end gap-2">
+                                                <div class="text-nowrap fw-bold">{{ (item.preco * item.quantidade)|brl }}</div>
+                                                <form method="POST" action="{{ url_for('remover_do_carrinho', produto_id=item_id) }}"
+                                                      class="d-inline">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card shadow-sm sticky-top" style="top: 20px;">
+                        <div class="card-body">
+                            <h4 class="card-title mb-3">Resumo do Pedido</h4>
+                            
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal:</span>
+                                <strong>{{ total_sem_desconto|brl }}</strong>
+                            </div>
+                            
+                            <div class="payment-methods mb-3">
+                                <h5 class="mb-3">Frete</h5>
+                                
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Valor:</span>
+                                    <strong>
+                                        {% if frete_info.valor == 0 %}
+                                            <span class="text-success">Grátis</span>
+                                        {% else %}
+                                            {{ frete_info.valor|brl }}
+                                        {% endif %}
+                                    </strong>
+                                </div>
+                                
+                                {% if frete_info.falta_para_gratis > 0 %}
+                                <div class="progress mb-2">
+                                    {% set porcentagem = (100 - (frete_info.falta_para_gratis / frete_info.valor_minimo * 100)) %}
+                                    <div class="progress-bar" role="progressbar" 
+                                        style="width: {{ porcentagem }}%" 
+                                        aria-valuenow="{{ porcentagem }}" 
+                                        aria-valuemin="0" 
+                                        aria-valuemax="100">
+                                        {{ "%.0f"|format(porcentagem) }}%
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-info small mb-0">
+                                    <i class="bi bi-info-circle"></i>
+                                    Adicione mais <strong>{{ frete_info.falta_para_gratis|brl }}</strong> 
+                                    para frete grátis!
+                                </div>
+                                {% else %}
+                                <div class="alert alert-success small mb-0">
+                                    <i class="bi bi-check-circle"></i>
+                                    Frete grátis aplicado!
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            {% if desconto_prime > 0 %}
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>
+                                    Desconto Prime 
+                                    <span class="discount-badge">{{ current_user.desconto_prime }}% OFF</span>
+                                </span>
+                                <strong class="text-success">- {{ desconto_prime|brl }}</strong>
+                            </div>
+                            {% endif %}
+                            
+                            <hr>
+                            
+                            <div class="d-flex justify-content-between mb-4">
+                                <h5>Total:</h5>
+                                <div>
+                                    {% if desconto_prime > 0 %}
+                                        <div class="original-price">{{ total_sem_desconto|brl }}</div>
+                                    {% endif %}
+                                    <h5 class="text-success">{{ total_com_desconto|brl }}</h5>
+                                </div>
+                            </div>
+                            
+                            {% if current_user.is_authenticated %}
+                                <div class="payment-methods">
+                                    <h5 class="mb-3">Pagamento</h5>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="metodo_pagamento" 
+                                               id="pix" value="Pix" checked>
+                                        <label class="form-check-label" for="pix">
+                                            <i class="bi bi-qr-code"></i> Pix
+                                        </label>
+                                        <div class="payment-details mt-2" id="pix-details">
+                                            <div class="alert alert-info small">
+                                                <p class="mb-1"><strong>Chave Pix:</strong> CNPJ 47.358.033/0001-71</p>
+                                                <p class="mb-1"><strong>Beneficiário:</strong> Estilo Musical</p>
+                                                <p class="mb-0"><strong>Valor:</strong> {{ total_com_desconto|brl }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="radio" name="metodo_pagamento" 
+                                               id="cartao" value="Cartão de Crédito">
+                                        <label class="form-check-label" for="cartao">
+                                            <i class="bi bi-credit-card"></i> Cartão
+                                        </label>
+                                        <div class="payment-details mt-2 d-none" id="cartao-details">
+                                            <div class="alert alert-warning small">
+                                                <p class="mb-0">Nosso time entrará em contato para coletar os dados do cartão com segurança.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <form method="POST" action="{{ url_for('finalizar_pedido') }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="metodo_pagamento" id="selected-payment" value="Pix">
+                                    <button type="submit" class="btn btn-success btn-checkout w-100 mt-3">
+                                        <i class="bi bi-check-circle"></i> Finalizar Compra
+                                    </button>
+                                </form>
+                            {% else %}
+                                <a href="{{ url_for('login', next=url_for('ver_carrinho')) }}" 
+                                   class="btn btn-warning btn-checkout w-100">
+                                    <i class="bi bi-person-fill"></i> Fazer Login
+                                </a>
+                                <p class="text-center mt-2 small">
+                                    Não tem conta? <a href="{{ url_for('registrar', next=url_for('ver_carrinho')) }}">Cadastre-se</a>
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body text-center py-5">
+                            <i class="bi bi-cart-x empty-cart-icon"></i>
+                            <h2 class="h4 mt-3">Seu carrinho está vazio</h2>
+                            <p class="text-muted mb-4">Adicione produtos para continuar</p>
+                            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                                <i class="bi bi-arrow-left"></i> Voltar às compras
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update quantity function
+            function updateQuantity(itemId, quantity) {
+                fetch(`/atualizar-quantidade/${itemId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    },
+                    body: `quantidade=${quantity}&csrf_token={{ csrf_token() }}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Erro ao atualizar quantidade');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Erro na conexão com o servidor');
+                });
+            }
+
+            // Increment buttons
+            document.querySelectorAll('.increment-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const itemId = this.getAttribute('data-item-id');
+                    const input = document.querySelector(`.quantity-input[data-item-id="${itemId}"]`);
+                    const newValue = parseInt(input.value) + 1;
+                    updateQuantity(itemId, newValue);
+                });
+            });
+
+            // Decrement buttons
+            document.querySelectorAll('.decrement-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const itemId = this.getAttribute('data-item-id');
+                    const input = document.querySelector(`.quantity-input[data-item-id="${itemId}"]`);
+                    const newValue = parseInt(input.value) - 1;
+                    if (newValue >= 1) {
+                        updateQuantity(itemId, newValue);
+                    }
+                });
+            });
+
+            // Mostrar detalhes do método de pagamento selecionado
+            const paymentMethods = document.querySelectorAll('input[name="metodo_pagamento"]');
+            const paymentDetails = document.querySelectorAll('.payment-details');
+            const selectedPayment = document.getElementById('selected-payment');
+            
+            paymentMethods.forEach(method => {
+                method.addEventListener('change', function() {
+                    paymentDetails.forEach(detail => {
+                        detail.classList.add('d-none');
+                    });
+                    
+                    const detailsId = this.id + '-details';
+                    document.getElementById(detailsId).classList.remove('d-none');
+                    
+                    selectedPayment.value = this.value;
+                });
+            });
+        });
+    </script>
+</body>
+</html>

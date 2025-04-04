@@ -1,0 +1,246 @@
+/* ===== ESTILOS GERAIS DO CARRINHO ===== */
+.cart-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 15px;
+}
+
+/* ===== CABEÇALHO ===== */
+.cart-header {
+    border-bottom: 1px solid #eaeaea;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.cart-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ===== ITENS DO CARRINHO ===== */
+.cart-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
+}
+
+.cart-item:hover {
+    background-color: #f9f9f9;
+}
+
+.cart-item-img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 5px;
+    background: white;
+    transition: transform 0.3s ease;
+}
+
+.cart-item:hover .cart-item-img {
+    transform: scale(1.05);
+}
+
+.cart-item-name {
+    font-weight: 500;
+    margin-bottom: 3px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.cart-item-code {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+/* ===== CONTROLES DE QUANTIDADE ===== */
+.quantity-control {
+    display: flex;
+    align-items: center;
+    max-width: 120px;
+}
+
+.quantity-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    user-select: none;
+}
+
+.quantity-btn:hover {
+    background-color: #e9ecef;
+}
+
+.quantity-input {
+    width: 40px;
+    height: 32px;
+    text-align: center;
+    border: 1px solid #dee2e6;
+    border-left: none;
+    border-right: none;
+}
+
+/* ===== RESUMO DO PEDIDO ===== */
+.order-summary {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #eaeaea;
+}
+
+.summary-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.summary-total {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eaeaea;
+}
+
+/* ===== MÉTODOS DE PAGAMENTO ===== */
+.payment-method {
+    margin-bottom: 15px;
+}
+
+.payment-method label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.payment-details {
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
+    margin-top: 10px;
+    border: 1px solid #eaeaea;
+    font-size: 0.9rem;
+}
+
+/* ===== BOTÕES ===== */
+.btn-checkout {
+    width: 100%;
+    padding: 12px;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.btn-checkout:hover {
+    transform: translateY(-2px);
+}
+
+/* ===== CARRINHO VAZIO ===== */
+.empty-cart {
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.empty-cart-icon {
+    font-size: 4rem;
+    color: #6c757d;
+    opacity: 0.6;
+    margin-bottom: 20px;
+}
+
+/* ===== BADGES ===== */
+.discount-badge {
+    background-color: #28a745;
+    color: white;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 5px;
+}
+
+/* ===== PROGRESSO DO FRETE ===== */
+.shipping-progress {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+    margin: 10px 0;
+}
+
+.shipping-progress-bar {
+    height: 100%;
+    border-radius: 4px;
+    background-color: #28a745;
+    transition: width 0.6s ease;
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+    .cart-item {
+        padding: 15px 0;
+    }
+    
+    .cart-item-img {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .quantity-control {
+        max-width: 110px;
+    }
+    
+    .quantity-btn {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .quantity-input {
+        width: 36px;
+        height: 28px;
+    }
+    
+    .mobile-price {
+        font-size: 0.85rem;
+        margin-top: 5px;
+    }
+    
+    .order-summary {
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .cart-item-img {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .cart-item-name {
+        font-size: 0.95rem;
+    }
+    
+    .btn-checkout {
+        padding: 10px;
+        font-size: 0.95rem;
+    }
+}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; }
+        .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; }
+        .header { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        .pix-info { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Obrigado por sua compra, {{ pedido.cliente_nome }}!</h2>
+            <p>Pedido #{{ pedido.id }} - {{ pedido.data_pedido.strftime('%d/%m/%Y %H:%M') }}</p>
+        </div>
+
+        <h3>Detalhes do Pedido</h3>
+        <table class="table">
+            <tr>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Preço Unitário</th>
+                <th>Subtotal</th>
+            </tr>
+            {% for item in pedido.itens %}
+            <tr>
+                <td>{{ item.produto_nome }} ({{ item.produto_codigo }})</td>
+                <td>{{ item.quantidade }}</td>
+                <td>{{ item.preco_unitario|brl }}</td>
+                <td>{{ (item.quantidade * item.preco_unitario)|brl }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="3" style="text-align: right"><strong>Total:</strong></td>
+                <td>{{ pedido.total|brl }}</td>
+            </tr>
+        </table>
+
+        {% if pedido.metodo_pagamento == 'Pix' and pix_data %}
+        <div class="pix-info">
+            <h4>Instruções para Pagamento via PIX</h4>
+            <p><strong>Chave PIX:</strong> {{ pix_data.key }}</p>
+            <p><strong>Valor:</strong> {{ pix_data.amount|brl }}</p>
+            <p>Use o QR Code abaixo ou copie a chave PIX em seu aplicativo bancário</p>
+            <img src="{{ pix_data.qr_code }}" alt="QR Code PIX" style="max-width: 200px;">
+        </div>
+        {% endif %}
+
+        <p><strong>Status do Pedido:</strong> {{ pedido.status|title }}</p>
+        <p><strong>Forma de Pagamento:</strong> {{ pedido.metodo_pagamento }}</p>
+
+        <p>Acompanhe seu pedido em: <a href="{{ url_for('listar_pedidos', _external=True) }}">Meus Pedidos</a></p>
+        
+        <p>Atenciosamente,<br>Equipe Estilo Musical</p>
+    </div>
+</body>
+</html>

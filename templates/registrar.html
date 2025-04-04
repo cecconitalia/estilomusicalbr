@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Estilo Musical</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #f8f9fc;
+            --accent-color: #2e59d9;
+            --text-color: #5a5c69;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8f9fc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 2rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .register-container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .register-left {
+            background: var(--primary-color);
+            color: white;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-image: url('https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        
+        .register-left::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(78, 115, 223, 0.85);
+        }
+        
+        .register-left-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .register-right {
+            background: white;
+            padding: 3rem;
+        }
+        
+        .form-control {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #d1d3e2;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            padding: 0.75rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+        
+        .input-group-text {
+            background-color: #f8f9fc;
+            border-radius: 8px 0 0 8px !important;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+        }
+        
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #d1d3e2;
+        }
+        
+        .divider-text {
+            padding: 0 1rem;
+            color: var(--text-color);
+            font-size: 0.875rem;
+        }
+        
+        @media (max-width: 768px) {
+            .register-container {
+                flex-direction: column;
+            }
+            
+            .register-left, .register-right {
+                padding: 2rem;
+            }
+        }
+
+        .prime-benefits {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .loading {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" stroke="%234e73df" stroke-width="8" fill="none" stroke-dasharray="60 20" transform="rotate(0 50 50)"><animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50"/></circle></svg>');
+            background-position: right 10px center;
+            background-repeat: no-repeat;
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container row g-0">
+        <!-- Lado Esquerdo (Ilustração) -->
+        <div class="col-lg-5 register-left">
+            <div class="register-left-content">
+                <h1 class="mb-4">Junte-se à nossa comunidade</h1>
+                <p class="mb-4">Faça parte da maior plataforma de instrumentos musicais do Brasil e aproveite benefícios exclusivos.</p>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="bi bi-check-circle-fill me-2"></i> Acesso a ofertas exclusivas</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill me-2"></i> Histórico de pedidos</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill me-2"></i> Lista de desejos</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill me-2"></i> Descontos especiais</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Lado Direito (Formulário) -->
+        <div class="col-lg-7 register-right">
+            <h2 class="mb-4 text-center">Crie sua conta</h2>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show mb-4" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="prime-benefits">
+                    <h6><i class="bi bi-stars me-2"></i> Benefícios Prime</h6>
+                    <p class="small mb-2">Tenha descontos exclusivos e benefícios especiais com um código Prime válido.</p>
+                </div>
+                
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="nome" class="form-label">Nome Completo *</label>
+                        <input type="text" class="form-control" id="nome" name="nome" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="email" class="form-label">Email *</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="telefone" class="form-label">Telefone</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                            <input type="tel" class="form-control" id="telefone" name="telefone" placeholder="(00) 00000-0000">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="data_nascimento" class="form-label">Data de Nascimento</label>
+                        <input type="date" class="form-control" id="data_nascimento" name="data_nascimento">
+                    </div>
+                </div>
+                
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="cep" class="form-label">CEP</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                            <input type="text" class="form-control" id="cep" name="cep" placeholder="00000-000">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="bairro" class="form-label">Bairro</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-pin-map"></i></span>
+                            <input type="text" class="form-control" id="bairro" name="bairro">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="endereco" class="form-label">Endereço</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-house-door"></i></span>
+                            <input type="text" class="form-control" id="endereco" name="endereco" placeholder="Rua, avenida, etc.">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="numero" class="form-label">Número</label>
+                        <input type="text" class="form-control" id="numero" name="numero" placeholder="Nº">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="complemento" class="form-label">Complemento</label>
+                        <input type="text" class="form-control" id="complemento" name="complemento" placeholder="Apto, bloco, etc.">
+                    </div>
+                </div>
+                
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="cidade" class="form-label">Cidade</label>
+                        <input type="text" class="form-control" id="cidade" name="cidade">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="estado" class="form-label">Estado</label>
+                        <input type="text" class="form-control" id="estado" name="estado" maxlength="2" placeholder="UF">
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="prime_code" class="form-label">Código Prime (opcional)</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-star-fill"></i></span>
+                        <input type="text" class="form-control" id="prime_code" name="prime_code" placeholder="Digite seu código de indicação">
+                    </div>
+                    <small class="text-muted">Se você tem um código Prime, insira aqui para obter benefícios exclusivos.</small>
+                </div>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="senha" class="form-label">Senha *</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control" id="senha" name="senha" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="confirmar_senha" class="form-label">Confirmar Senha *</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control" id="confirmar_senha" name="confirmar_senha" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid mb-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-person-plus me-2"></i> Criar Conta
+                    </button>
+                </div>
+                
+                <div class="text-center">
+                    <p class="mb-0">Já tem uma conta? <a href="{{ url_for('login') }}" class="text-primary">Faça login</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Máscaras para os campos
+        document.getElementById('telefone').addEventListener('input', function(e) {
+            var value = e.target.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.substring(0, 11);
+            
+            if (value.length <= 10) {
+                value = value.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+            } else {
+                value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            }
+            
+            e.target.value = value;
+        });
+
+        document.getElementById('cep').addEventListener('input', function(e) {
+            var value = e.target.value.replace(/\D/g, '');
+            if (value.length > 8) value = value.substring(0, 8);
+            value = value.replace(/(\d{5})(\d{3})/, '$1-$2');
+            e.target.value = value;
+        });
+
+        // Preenchimento automático do endereço pelo CEP
+        document.getElementById('cep').addEventListener('blur', function(e) {
+            const cep = e.target.value.replace(/\D/g, '');
+            
+            if (cep.length !== 8) {
+                return;
+            }
+
+            const cepInput = e.target;
+            cepInput.classList.add('loading');
+            
+            fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.erro) {
+                        document.getElementById('endereco').value = data.logradouro || '';
+                        document.getElementById('cidade').value = data.localidade || '';
+                        document.getElementById('estado').value = data.uf || '';
+                        document.getElementById('bairro').value = data.bairro || '';
+                        
+                        if (data.logradouro) {
+                            document.getElementById('numero').focus();
+                        }
+                    } else {
+                        alert('CEP não encontrado. Por favor, preencha o endereço manualmente.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar CEP:', error);
+                    alert('Erro ao consultar CEP. Por favor, preencha o endereço manualmente.');
+                })
+                .finally(() => {
+                    cepInput.classList.remove('loading');
+                });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Atualização do Pedido #{{ pedido.id }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #f8f9fa; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .footer { margin-top: 20px; padding: 20px; text-align: center; font-size: 12px; color: #777; }
+        .status-box { background-color: #f0f8ff; padding: 15px; border-left: 4px solid #007bff; margin: 20px 0; }
+        .order-details { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .order-details th, .order-details td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        .order-details th { background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Estilo Musical</h1>
+            <h2>Atualização do Pedido #{{ pedido.id }}</h2>
+        </div>
+        
+        <div class="content">
+            <p>Olá {{ pedido.cliente_nome }},</p>
+            
+            <div class="status-box">
+                <p><strong>Status atualizado:</strong> {{ mensagem_status }}</p>
+                <p>Status anterior: {{ status_anterior|title }}</p>
+                <p>Data da atualização: {{ data_atualizacao }}</p>
+            </div>
+            
+            {% if pedido.codigo_rastreio %}
+            <p>
+                <strong>Código de rastreio:</strong> {{ pedido.codigo_rastreio }}<br>
+                {% if pedido.status == 'enviado' %}
+                Você pode acompanhar sua entrega através do site dos Correios.
+                {% endif %}
+            </p>
+            {% endif %}
+            
+            <h3>Detalhes do Pedido</h3>
+            <table class="order-details">
+                <tr>
+                    <th>Produto</th>
+                    <th>Quantidade</th>
+                    <th>Status</th>
+                </tr>
+                {% for item in pedido.itens %}
+                <tr>
+                    <td>{{ item.produto_nome }}</td>
+                    <td>{{ item.quantidade }}</td>
+                    <td>{{ item.status|title }}</td> <!-- Aqui deve mostrar o status atual -->
+                </tr>
+                {% endfor %}
+            </table>
+            
+            <p><strong>Total do pedido:</strong> {{ pedido.total|brl }}</p>
+            
+            {% if pedido.observacoes %}
+            <p><strong>Observações:</strong><br>{{ pedido.observacoes }}</p>
+            {% endif %}
+        </div>
+        
+        <div class="footer">
+            <p>Em caso de dúvidas, entre em contato conosco pelo e-mail estilomusicalbr@gmail.com</p>
+            <p>Este é um e-mail automático, por favor não responda.</p>
+        </div>
+    </div>
+</body>
+</html>
