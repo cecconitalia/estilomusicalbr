@@ -1455,7 +1455,7 @@ class BlingAPI:
         self.scheduler.add_job(
             func=self._refresh_access_token,
             trigger='interval',
-            seconds=7200  # Atualiza a cada 2 horas
+            seconds=3600  # Atualiza a cada 1 hora
         )
         self.scheduler.start()
 
@@ -1901,6 +1901,21 @@ def adicionar_ao_carrinho():
 
         carrinho = session.get('carrinho', {})
         
+        # Verificar estoque considerando itens já no carrinho
+        quantidade_no_carrinho = carrinho.get(produto_id, {}).get('quantidade', 0)
+        quantidade_total = quantidade_no_carrinho + quantidade
+        
+        estoque_disponivel = produto['estoque']['saldoVirtualTotal']
+        
+        if quantidade_total > estoque_disponivel:
+            disponivel = max(estoque_disponivel - quantidade_no_carrinho, 0)
+            return jsonify({
+                'success': False,
+                'message': f'Estoque insuficiente. Disponível: {disponivel}',
+                'estoque_disponivel': disponivel
+            }), 400
+
+        # Atualizar carrinho
         if produto_id in carrinho:
             carrinho[produto_id]['quantidade'] += quantidade
         else:
@@ -1919,7 +1934,8 @@ def adicionar_ao_carrinho():
         return jsonify({
             'success': True,
             'message': 'Produto adicionado ao carrinho!',
-            'cart_total_items': sum(item['quantidade'] for item in carrinho.values())
+            'cart_total_items': sum(item['quantidade'] for item in carrinho.values()),
+            'estoque_disponivel': estoque_disponivel - quantidade_total
         }), 200
 
     except Exception as e:
