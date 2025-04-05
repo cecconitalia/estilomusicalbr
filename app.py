@@ -824,7 +824,7 @@ def atualizar_item_pedido(item_id):
 def listar_pedidos():
     page = request.args.get('page', 1, type=int)
     per_page = 10
-    pedidos = Pedido.query.order_by(Pedido.data_pedido.desc()).paginate(page=page, per_page=per_page)
+    pedidos = Pedido.query.filter_by(usuario_id=current_user.id).order_by(Pedido.data_pedido.desc()).paginate(page=page, per_page=per_page)
     return render_template('pedidos.html', pedidos=pedidos)
 
 
