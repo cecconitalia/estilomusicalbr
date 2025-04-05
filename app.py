@@ -844,9 +844,11 @@ def registrar():
         endereco = request.form.get('endereco', '').strip()
         numero = request.form.get('numero', '').strip()
         complemento = request.form.get('complemento', '').strip()
+        bairro = request.form.get('bairro', '').strip()
         cidade = request.form.get('cidade', '').strip()
         estado = request.form.get('estado', '').strip()
         cep = request.form.get('cep', '').strip()
+        data_nascimento_str = request.form.get('data_nascimento', '').strip()
         prime_code = request.form.get('prime_code', '').strip()
 
         # Montar endereço completo
@@ -854,109 +856,140 @@ def registrar():
         if complemento:
             endereco_completo += f" - {complemento}"
 
+        # Converter data de nascimento
+        data_nascimento = None
+        if data_nascimento_str:
+            try:
+                data_nascimento = datetime.strptime(data_nascimento_str, '%Y-%m-%d').date()
+            except ValueError:
+                flash('Data de nascimento inválida. Use o formato YYYY-MM-DD.', 'danger')
+                return render_template('registrar.html', 
+                                       nome=nome, 
+                                       email=email,
+                                       telefone=telefone,
+                                       endereco=endereco,
+                                       numero=numero,
+                                       complemento=complemento,
+                                       bairro=bairro,
+                                       cidade=cidade,
+                                       estado=estado,
+                                       cep=cep,
+                                       data_nascimento=data_nascimento_str)
+
         # Validações básicas
         if not all([nome, email, senha, confirmar_senha]):
             flash('Preencha todos os campos obrigatórios', 'warning')
             return render_template('registrar.html', 
-                                 nome=nome, 
-                                 email=email,
-                                 telefone=telefone,
-                                 endereco=endereco,
-                                 numero=numero,
-                                 complemento=complemento,
-                                 cidade=cidade,
-                                 estado=estado,
-                                 cep=cep)
+                                   nome=nome, 
+                                   email=email,
+                                   telefone=telefone,
+                                   endereco=endereco,
+                                   numero=numero,
+                                   complemento=complemento,
+                                   bairro=bairro,
+                                   cidade=cidade,
+                                   estado=estado,
+                                   cep=cep,
+                                   data_nascimento=data_nascimento_str)
 
         if senha != confirmar_senha:
             flash('As senhas não coincidem', 'danger')
             return render_template('registrar.html', 
-                                 nome=nome, 
-                                 email=email,
-                                 telefone=telefone,
-                                 endereco=endereco,
-                                 numero=numero,
-                                 complemento=complemento,
-                                 cidade=cidade,
-                                 estado=estado,
-                                 cep=cep)
+                                   nome=nome, 
+                                   email=email,
+                                   telefone=telefone,
+                                   endereco=endereco,
+                                   numero=numero,
+                                   complemento=complemento,
+                                   bairro=bairro,
+                                   cidade=cidade,
+                                   estado=estado,
+                                   cep=cep,
+                                   data_nascimento=data_nascimento_str)
 
         if User.query.filter_by(email=email).first():
             flash('Email já cadastrado', 'danger')
             return render_template('registrar.html', 
-                                 nome=nome,
-                                 telefone=telefone,
-                                 endereco=endereco,
-                                 numero=numero,
-                                 complemento=complemento,
-                                 cidade=cidade,
-                                 estado=estado,
-                                 cep=cep)
+                                   nome=nome,
+                                   telefone=telefone,
+                                   endereco=endereco,
+                                   numero=numero,
+                                   complemento=complemento,
+                                   bairro=bairro,
+                                   cidade=cidade,
+                                   estado=estado,
+                                   cep=cep,
+                                   data_nascimento=data_nascimento_str)
 
         # Validação do código Prime
         desconto_prime = 0.0
         indicador_id = None
-        
+
         if prime_code:
             code = PrimeCode.query.filter_by(codigo=prime_code).first()
-            
+
             if not code:
                 flash('Código Prime inválido!', 'danger')
                 return render_template('registrar.html', 
-                                     nome=nome, 
-                                     email=email,
-                                     telefone=telefone,
-                                     endereco=endereco,
-                                     numero=numero,
-                                     complemento=complemento,
-                                     cidade=cidade,
-                                     estado=estado,
-                                     cep=cep)
-                
+                                       nome=nome, 
+                                       email=email,
+                                       telefone=telefone,
+                                       endereco=endereco,
+                                       numero=numero,
+                                       complemento=complemento,
+                                       bairro=bairro,
+                                       cidade=cidade,
+                                       estado=estado,
+                                       cep=cep,
+                                       data_nascimento=data_nascimento_str)
+
             if not code.ativo:
                 flash('Código Prime desativado!', 'danger')
                 return render_template('registrar.html', 
-                                     nome=nome, 
-                                     email=email,
-                                     telefone=telefone,
-                                     endereco=endereco,
-                                     numero=numero,
-                                     complemento=complemento,
-                                     cidade=cidade,
-                                     estado=estado,
-                                     cep=cep)
-                
+                                       nome=nome, 
+                                       email=email,
+                                       telefone=telefone,
+                                       endereco=endereco,
+                                       numero=numero,
+                                       complemento=complemento,
+                                       bairro=bairro,
+                                       cidade=cidade,
+                                       estado=estado,
+                                       cep=cep,
+                                       data_nascimento=data_nascimento_str)
+
             if code.data_expiracao and code.data_expiracao < datetime.utcnow():
                 flash('Código Prime expirado!', 'danger')
                 return render_template('registrar.html', 
-                                     nome=nome, 
-                                     email=email,
-                                     telefone=telefone,
-                                     endereco=endereco,
-                                     numero=numero,
-                                     complemento=complemento,
-                                     cidade=cidade,
-                                     estado=estado,
-                                     cep=cep)
-                
+                                       nome=nome, 
+                                       email=email,
+                                       telefone=telefone,
+                                       endereco=endereco,
+                                       numero=numero,
+                                       complemento=complemento,
+                                       bairro=bairro,
+                                       cidade=cidade,
+                                       estado=estado,
+                                       cep=cep,
+                                       data_nascimento=data_nascimento_str)
+
             if code.usos_atuais >= code.usos_maximos:
                 flash('Código Prime já utilizado!', 'danger')
                 return render_template('registrar.html', 
-                                     nome=nome, 
-                                     email=email,
-                                     telefone=telefone,
-                                     endereco=endereco,
-                                     numero=numero,
-                                     complemento=complemento,
-                                     cidade=cidade,
-                                     estado=estado,
-                                     cep=cep)
-            
-            # Aplicar benefícios
+                                       nome=nome, 
+                                       email=email,
+                                       telefone=telefone,
+                                       endereco=endereco,
+                                       numero=numero,
+                                       complemento=complemento,
+                                       bairro=bairro,
+                                       cidade=cidade,
+                                       estado=estado,
+                                       cep=cep,
+                                       data_nascimento=data_nascimento_str)
+
             desconto_prime = code.percentual_desconto
             indicador_id = code.indicador_id
-            
-            # Atualizar código
             code.usos_atuais += 1
             if code.usos_atuais >= code.usos_maximos:
                 code.ativo = False
@@ -968,21 +1001,22 @@ def registrar():
                 email=email,
                 telefone=telefone,
                 endereco=endereco_completo,
+                bairro=bairro,
                 cidade=cidade,
                 estado=estado,
                 cep=cep,
+                data_nascimento=data_nascimento,
                 desconto_prime=desconto_prime,
                 indicador_id=indicador_id,
                 prime_code=prime_code if prime_code else None
             )
             novo_usuario.set_senha(senha)
-            
             db.session.add(novo_usuario)
             db.session.commit()
-            
+
             login_user(novo_usuario)
             next_page = request.args.get('next', url_for('ver_carrinho' if session.get('carrinho') else 'index'))
-            
+
             flash('Cadastro realizado com sucesso!', 'success')
             return redirect(next_page)
 
@@ -992,6 +1026,7 @@ def registrar():
             flash('Erro ao cadastrar. Tente novamente.', 'danger')
 
     return render_template('registrar.html', next=request.args.get('next'))
+
 
 @app.route('/excluir-conta', methods=['POST'])
 @login_required
